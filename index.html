@@ -3,11 +3,21 @@
 <head>
     <title>LAN Game</title>
     <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { background: #111; display: block; }
+        body { margin: 0; overflow: hidden; background: #111; color: white; }
+        #ui {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+        }
     </style>
 </head>
 <body>
+
+<div id="ui">
+    <button onclick="createRoom()">Host Game</button>
+    <input id="roomInput" placeholder="Enter Code">
+    <button onclick="joinRoom()">Join</button>
+</div>
 
 <canvas id="game"></canvas>
 
