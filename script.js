@@ -4,24 +4,29 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let player = { x: 100, y: 100, size: 20 };
-let otherPlayer = { x: 200, y: 200, size: 20 };
+let player = { x: 100, y: 100 };
+let other = { x: 200, y: 200 };
 
 let keys = {};
 
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
-// 🔥 SIMPLE LOCAL STORAGE "FAKE NETWORK"
-function sendData() {
-    localStorage.setItem("player", JSON.stringify(player));
+// 🔥 SIMPLE ONLINE USING PUBLIC SIGNAL (localStorage trick won't work across devices)
+// So we simulate with URL room
+
+let room = "";
+let isHost = false;
+
+function createRoom() {
+    room = Math.random().toString(36).substring(2, 7);
+    isHost = true;
+    alert("Room Code: " + room);
 }
 
-function receiveData() {
-    let data = localStorage.getItem("player");
-    if (data) {
-        otherPlayer = JSON.parse(data);
-    }
+function joinRoom() {
+    room = document.getElementById("roomInput").value;
+    alert("Joined Room: " + room);
 }
 
 function update() {
@@ -30,26 +35,34 @@ function update() {
     if (keys["a"]) player.x -= 3;
     if (keys["d"]) player.x += 3;
 
-    sendData();
-    receiveData();
+    // FAKE SYNC USING URL HASH (simple trick)
+    if (room) {
+        location.hash = room + "|" + player.x + "|" + player.y;
+    }
+
+    if (location.hash.includes("|")) {
+        let data = location.hash.replace("#", "").split("|");
+        if (data.length === 3) {
+            other.x = parseInt(data[1]);
+            other.y = parseInt(data[2]);
+        }
+    }
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // You
     ctx.fillStyle = "lime";
-    ctx.fillRect(player.x, player.y, player.size, player.size);
+    ctx.fillRect(player.x, player.y, 20, 20);
 
-    // Other player
     ctx.fillStyle = "red";
-    ctx.fillRect(otherPlayer.x, otherPlayer.y, otherPlayer.size, otherPlayer.size);
+    ctx.fillRect(other.x, other.y, 20, 20);
 }
 
-function gameLoop() {
+function loop() {
     update();
     draw();
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(loop);
 }
 
-gameLoop();
+loop();
